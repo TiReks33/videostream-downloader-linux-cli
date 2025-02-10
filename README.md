@@ -1,6 +1,8 @@
 # videostream-downloader-linux-cli
 ## Description
-Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 video-file.
+Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 video-file (by ffmpeg).
+## Depends
+ffmpeg, Python interpreter (testing on Python 3.9.2)
 ## Usage
 Copy-paste your transport video's chunklist URL adress and put it as -u(--url) argument. This can be done by next method:  
 
