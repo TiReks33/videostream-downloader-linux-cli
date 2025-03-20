@@ -50,3 +50,27 @@ foo@bar:~$ python3 videostream-downloader-linux-cli.py --merge -o merged_video_f
 ```console
 foo@bar:~$ python3 videostream-downloader-linux-cli.py -cc /path/to/video1.mp4 '/path/to/fine video2.mp4' -o 2in1video.mp4
 ```
+
+## Known bug(toDo)
+\[__String output restriction__\]  
+If '--download' stage output contains a big amount of raw .ts segments(that digit may vary depending on segments names  
+length, 1000+ in average), 4ex., when download big videostreams that broken to a small (<=5 sec) parts, there is a chance  
+for next error type occure:  
+__"\**long string of raw video segments paths (glued together)*\*[FAILED] ffmpeg failed."__  
+  
+\[__temporary solution__\]  
+1. After error occured, go to the "raw" folder (*${HOME}/\_\_VIDEOSTREAM_DOWNLOADER_OUTPUT\_\_/raw*), in your file manager  
+(4 ex., "Explorer" in Windows, or "Dolphin" on Linux-based system) sort that folder by names (in descending order).  
+2. Move first n-fragments (.ts files) in some temporary folder (but <ins>not delete them!</ins>), so <ins>that there are no more than  
+1000 remaining </ins>.
+4. Run script with '--merge'(-m) parameter and name output as 'some_name1' (also '--clear' parameter is optional), so you  
+will download first part of your videostream.
+5. Next, if you not specify a '--clear' parameter in previous (3.) step, you must remove all .ts chunks from 'raw' folder  
+(<ins>but not 'raw' folder itself!</ins>), and move fragments, that you previously moved to another folder at (2.) step,  
+back to 'raw' folder.
+6. If now there is more than 1000 .ts files again in 'raw' directory, repeat steps (2-4), but at step (3.) give your output  
+part file next number digit in '--output' argument (4ex., '\**some_name*\*2', '\**some name*\*3' etc.). If after that 'raw'  
+dir includes less then 1000 .ts files, go to the last, (7.) stage.
+7. All merged at previous stages .mp4 parts (4ex., '\**some_name*\*1.mp4', '\**some name*\*2.mp4' and so on, depending on how  
+much segments your videostream's chunklist included) you may concatate to 1 'monolitic' videofile by passing '--concat'  
+('-cc') parameter to script (with '--output' parameter of your finalized 'monolitic' file name).
