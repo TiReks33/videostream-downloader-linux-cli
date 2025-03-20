@@ -56,7 +56,7 @@ foo@bar:~$ python3 videostream-downloader-linux-cli.py -cc /path/to/video1.mp4 '
 If '--download' stage output contains a big amount of raw .ts segments(that digit may vary depending on segments names  
 length, 1000+ in average), 4ex., when download big videostreams that broken to a small (<=5 sec) parts, there is a chance  
 for next error type occure:  
-__"\**long string of raw video segments paths (glued together)*\*[FAILED] ffmpeg failed."__  
+__"\**long string of raw video segments paths (glued together)*\*[FAILED] ffmpeg failed."__  ![Screenshot](videostream-downl-bug.png "Title")
   
 \[__temporary solution__\]  
 1. After error occured, go to the "raw" folder (*${HOME}/\_\_VIDEOSTREAM_DOWNLOADER_OUTPUT\_\_/raw*), in your file manager  
