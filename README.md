@@ -20,14 +20,17 @@ If previous download of chunks from list failed, you can set '--continue-interru
   -m, --merge           flag to only merge existing(in 'raw' subdir) .ts chunks to .mp4 file without downloading  
   -o OUTPUT [OUTPUT ...], --output OUTPUT [OUTPUT ...]  
                         output .mp4 file name (white-spaces and not-latin characters (4ex., cyrillic etc.) supported)  
-  -d, --download        flag to only download chunklist without merging to video-file (will be ignored with '--merge' or '--concat' flags)  
+  -d, --download        flag to only download chunklist without merging to video-file (will be ignored with '--merge'
+                        or '--concat' flags)  
   -a, --allow-failed-snippets  
                         this flag skips script terminating after 'wget' failed to download a (corrupted) videosnippet  
   -cc CONCAT [CONCAT ...], --concat CONCAT [CONCAT ...]  
-                        provide .mp4 file name/s (part/s) path/s to input for concat it to 1 video; this flag is usefull in situations when you have several already converted(merged) .mp4
-                        videos (4ex., several parts of 1 whole videostream, downloaded and merged via separate chunklists). Note: video parts will be provided to concat in the sequence of
-                        arguments.  
-  -cl, --clear          clear chunks folder after converting successfully finished (ignoring if '--download' flag is used)  
+                        provide .mp4 file name/s (part/s) path/s to input for concat it to 1 video; this flag is usefull
+                        in situations when you have several already converted(merged) .mp4
+                        videos (4ex., several parts of 1 whole videostream, downloaded and merged via separate
+                        chunklists). Note: video parts will be provided to concat in the sequence of arguments.  
+  -cl, --clear          clear chunks folder after converting successfully finished (ignoring if '--download' flag is
+                        used)  
   --outputDir OUTPUTDIR  
                         replace default output .mp4 file dir by this path  
   --rawDir RAWDIR       replace default raw chunks dir by this path  
@@ -37,19 +40,25 @@ Download raw chunks options:
   This options group included some [exclusive] parameters for "--download" stage.  
 
   --download-missing-only  
-                        Existing raw .ts files chunks in '--rawDir' (if any) will be preserved without rewriting. Note: this method [guarantees] that it's only download missing chunks from
-                        list, BUT it's nothing to do with [partially downloaded] files. Use it if you don't care about file integrity/completeness, or you sure of this in advance.  
+                        Existing raw .ts files chunks in '--rawDir' (if any) will be preserved without rewriting. Note:
+                        this method [guarantees] that it's only download missing chunks from list, BUT it's nothing to
+                        do with [partially downloaded] files. Use it if you don't care about file
+                        integrity/completeness, or you sure of this in advance.  
   --continue-interrupted-download  
-                        Partially downloaded or corrupted raw .ts chunks files of [previous failed/interrupted download] will be re-downloaded from chunks-list (along with missing ones),
-                        with replacement of existing. Note: use this method [ONLY] if previous download of chunk-list's raw files has been interrupted or failed at some progress stage;
-                        otherwise correct output not guaranteed.  
+                        Partially downloaded or corrupted raw .ts chunks files of [previous failed/interrupted download]
+                        will be re-downloaded from chunks-list (along with missing ones), with replacement of existing.
+                        Note: use this method [ONLY] if previous download of chunk-list's raw files has been interrupted
+                        or failed at some progress stage; otherwise correct output not guaranteed.  
 
 Merge options:  
   This options group is for "--merge" stage, and also for '--concat' option.  
 
-  --ts                  set this parameter for '--merge' stage (or when you use '--concat' option), if you want to keep output file in '.ts' format without converting to '.mp4'.  
-  --mkv                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use '.mkv' container format for your output formatting instead of '.mp4'.  
-  --mov                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use '.mov' container format for your output formatting instead of '.mp4'.  
+  --ts                  set this parameter for '--merge' stage (or when you use '--concat' option), if you want to keep
+                        output file in '.ts' format without converting to '.mp4'.  
+  --mkv                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use
+                        '.mkv' container format for your output formatting instead of '.mp4'.  
+  --mov                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use
+                        '.mov' container format for your output formatting instead of '.mp4'.  
 ```
 ## Example usage
 ```console
@@ -62,10 +71,12 @@ foo@bar:~$ python3 videostream-downloader-linux-cli.py -u https://*chunklist_lin
 foo@bar:~$ python3 videostream-downloader-linux-cli.py --merge -o merged_video_from_early_downloaded_ts_fragments.mp4
 ```
 ```console
-foo@bar:~$ python3 videostream-downloader-linux-cli.py -cc /path/to/video1.mp4 '/path/to/fine video2.mp4' -o 2in1video.mp4
+foo@bar:~$ python3 videostream-downloader-linux-cli.py -cc /path/to/video1.mp4 '/path/to/fine video2.mp4' -o
+2in1video.mp4
 ```
 ```console
-foo@bar:~$ python3 videostream-downloader-linux-cli.py --rawDir /path/to/raw/ts/chunks/ --outputDir /output/path/ --tempDir /path/to/temporary/files/ -o nameOfOutputFile -cl -u https://*chunklist_link*.m3u8 --download-missing-only
+foo@bar:~$ python3 videostream-downloader-linux-cli.py --rawDir /path/to/raw/ts/chunks/ --outputDir /output/path/  
+--tempDir /path/to/temporary/files/ -o nameOfOutputFile -cl -u https://*chunklist_link*.m3u8 --download-missing-only
 ```
 ```console
 foo@bar:~$ python3 videostream-downloader-linux-cli.py -m -o outputName --mkv --outputDir /some/path/to/output/ --clear
