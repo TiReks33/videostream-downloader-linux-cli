@@ -59,6 +59,9 @@ Merge options:
                         '.mkv' container format for your output formatting instead of '.mp4'.  
   --mov                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use
                         '.mov' container format for your output formatting instead of '.mp4'.  
+  --avi                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use
+                        '.avi' container format for your output formatting instead of '.mp4'.
+  
 ```
 ## Example usage
 ```console
