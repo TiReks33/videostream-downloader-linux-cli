@@ -9,7 +9,7 @@ import sys
 import subprocess
 import argparse
 import pathlib
-
+from posixpath import join as posixjoin
 
 _NAME='videostream-downloader-linux-cli'
 
@@ -29,7 +29,7 @@ RAW_DATA_DIR = os.path.join(DATA_DIR, "raw")
 
 TEMP_DIR = DATA_DIR
 
-DOWNLOAD_ERRORS_LOG_F = f'{DATA_DIR}/last_download_errors.log'
+DOWNLOAD_ERRORS_LOG_F = f'{TEMP_DIR}/last_download_errors.log'
 
 __ext='.mp4'
 
@@ -66,7 +66,7 @@ def shellSpaceEscape(entry:str)->str:
 
 def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_existing_chunks: bool=False, continue_previous: bool=False):
 
-    SDATA_DIR=shellSpaceEscape(DATA_DIR)
+    STEMP_DIR=shellSpaceEscape(TEMP_DIR)
     SRAW_DATA_DIR=shellSpaceEscape(RAW_DATA_DIR)
     SDOWNLOAD_ERRORS_LOG_F=shellSpaceEscape(DOWNLOAD_ERRORS_LOG_F)    
 
@@ -80,12 +80,21 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
     # chunklist
     print(">> Downloading chunklist..")
 
-    chunklist_path = os.path.join(DATA_DIR, chunklist_url.split("/")[-1])
-    wget_call_exit_code = os.system(f"wget --quiet {chunklist_url} -P {SDATA_DIR}")
+    chunklist_f_name = chunklist_url.split("/")[-1]
+
+    fat_ntfs_illegal = ['?','NUL','\',''//',':','*','"','<','>','|']
+ 
+    for il in fat_ntfs_illegal:
+        chunklist_f_name = chunklist_f_name.replace(il, '')
+
+    chunklist_path = os.path.join(TEMP_DIR, chunklist_f_name)
+    downl_chunklist = f"wget --quiet {chunklist_url} -O {STEMP_DIR}/{chunklist_f_name}"
+    wget_call_exit_code = os.system(downl_chunklist)
+    
     if wget_call_exit_code != 0:
         print(_FA+" Wget download of chunklist failed.")
         return False
-    with open(chunklist_path) as f:
+    with open(chunklist_path, "r") as f:
         chunklist = f.read()
     remove_file(chunklist_path)
 
@@ -481,7 +490,6 @@ if __name__ == "__main__":
         newPath=f"{' '.join(args.outputDir)}" 
         pathlib.Path(newPath).mkdir(parents=True, exist_ok=True) 
         DATA_DIR = newPath
-        DOWNLOAD_ERRORS_LOG_F = f'{DATA_DIR}/last_download_errors.log'
 
     if args.rawDir:
         newPath=f"{' '.join(args.rawDir)}"
@@ -498,7 +506,7 @@ if __name__ == "__main__":
         newPath=f"{' '.join(args.tempDir)}" 
         pathlib.Path(newPath).mkdir(parents=True, exist_ok=True) 
         TEMP_DIR=newPath
-    
+        DOWNLOAD_ERRORS_LOG_F = f'{TEMP_DIR}/last_download_errors.log'
 
     #concat several videofiles to 1 
     if args.concat:
