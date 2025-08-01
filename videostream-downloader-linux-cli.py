@@ -31,6 +31,8 @@ TEMP_DIR = DATA_DIR
 
 DOWNLOAD_ERRORS_LOG_F = f'{TEMP_DIR}/last_download_errors.log'
 
+__raw_ext='.ts'
+
 __ext='.mp4'
 
 # size in bytes
@@ -98,10 +100,10 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
         chunklist = f.read()
     remove_file(chunklist_path)
 
-    # download all ts files
+    # download all chunks files
     print(">> Grouping chunks..")
     base_url = "/".join(chunklist_url.split("/")[:-1])
-    file_pattern = re.compile("[^\n].*\.ts")
+    file_pattern = re.compile(f"[^\n].*\{__raw_ext}")
     raw_file_list = list(sorted(re.findall(file_pattern, chunklist)))
 
 
@@ -132,11 +134,11 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
     assert sum([len(c) for c in url_chunks]) == file_count
 
 
-    # download .ts files stage -->>
+    # download chunks files stage -->>
 
     if not keep_existing_chunks and not continue_previous :
-        # delete old .ts files if exists    
-        remove_files(RAW_DATA_DIR,'.ts')   
+        # delete old chunks files if exists    
+        remove_files(RAW_DATA_DIR,f"{__raw_ext}")   
 
     # remove downloads log file    
     remove_file(DOWNLOAD_ERRORS_LOG_F) 
@@ -276,18 +278,18 @@ def merge2mp4(title: str, clear_raw: bool=False):
 
         if clear_raw and not separateRaw2Temp :
 
-            if __ext == ".ts" :
+            if __ext == __raw_ext :
                 OP_REQ_SPACE=0
             elif overwrite_out_file :
                 OP_REQ_SPACE = OP_REQ_SPACE - getFileSize(MERGED_F_FULL_PATH)
 
         else : # if separateRaw2Temp or not clear_row :
 
-            if overwrite_out_file and __ext == ".ts" : 
+            if overwrite_out_file and __ext == __raw_ext : 
                 OP_REQ_SPACE = OP_REQ_SPACE - getFileSize(MERGED_F_FULL_PATH)
-            elif overwrite_out_file and __ext != ".ts" :
+            elif overwrite_out_file and __ext != __raw_ext :
                 OP_REQ_SPACE += (OP_REQ_SPACE - getFileSize(MERGED_F_FULL_PATH))
-            elif not overwrite_out_file and __ext != ".ts" :
+            elif not overwrite_out_file and __ext != __raw_ext :
                 OP_REQ_SPACE += OP_REQ_SPACE 
 
 
@@ -300,13 +302,13 @@ def merge2mp4(title: str, clear_raw: bool=False):
     print(">> Converting in progress..")
     
     
-    partFilesPathsCom=f"ls -vd {SRAW_DATA_DIR}/*.ts"
+    partFilesPathsCom=f"ls -vd {SRAW_DATA_DIR}/*{__raw_ext}"
     getPartFilesPaths=subprocess.run(partFilesPathsCom, capture_output=True, shell=True)
     partFilesPaths=getPartFilesPaths.stdout.decode()
     
     partLis=partFilesPaths.split('\n')[:-1]
 
-    __tfName=f'{title}_temp.ts'
+    __tfName=f'{title}_temp{__raw_ext}'
 
     __tPath = os.path.join(TEMP_DIR, __tfName)
     
@@ -324,14 +326,14 @@ def merge2mp4(title: str, clear_raw: bool=False):
         return 0
 
 
-    cc_error=f'{_FA} there is error while merging .ts chunks.'
+    cc_error=f'{_FA} there is error while merging chunks.'
 
-    # simplification for '.ts' output file format
-    if __ext == ".ts":
+    # simplification for raw output file format
+    if __ext == __raw_ext:
 
-        # case if only 1 .ts file gets merged
+        # case if only 1 raw file gets merged
         if len(partLis) == 1 :
-            print(f"Nothing to merge -- there is only one .ts file already in {RAW_DATA_DIR}.")
+            print(f"Nothing to merge -- there is only one {__ext_raw} file already in {RAW_DATA_DIR}.")
             sys.exit(1)
 
         else :
@@ -346,11 +348,11 @@ def merge2mp4(title: str, clear_raw: bool=False):
             
     else :
 
-        # case if only 1 .ts file gets merged
+        # case if only 1 raw file gets merged
         if len(partLis) == 1 :
             exit_code=concatvideos(partLis,title,overwrite_out_file)
             if clear_raw :
-                remove_files(RAW_DATA_DIR,'.ts')
+                remove_files(RAW_DATA_DIR,__raw_ext)
             
         else :
 
@@ -434,13 +436,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog=_NAME, description=f'::[{_NAME}]:: Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 video-file')
     main_flags_exclusive_group=parser.add_mutually_exclusive_group(required=True)
     main_flags_exclusive_group.add_argument('-u','--url', help='pass URL of chunklist here',type=str,nargs=1)
-    main_flags_exclusive_group.add_argument('-m','--merge', help='flag to only merge existing(in \'raw\' subdir) .ts chunks to .mp4 file without downloading',action='store_true')
+    main_flags_exclusive_group.add_argument('-m','--merge', help='flag to only merge existing(in \'raw\' subdir) chunks to output formatted file without downloading',action='store_true')
 
     parser.add_argument('-o','--output', help='output .mp4 file name (white-spaces and not-latin characters (4ex., cyrillic etc.) supported)',nargs='+',default=['output_video'])
     parser.add_argument('-d','--download',help='flag to only download chunklist without merging to video-file (will be ignored with \'--merge\' or \'--concat\' flags)',action='store_true')
 
     parser.add_argument('-a','--allow-failed-snippets',help='this flag skips script terminating after \'wget\' failed to download a (corrupted) videosnippet',action='store_true')
     
+    parser.add_argument('--customRaw',help='custom format for raw chunks instead of \'.ts\', 4ex. \'.aac\' audio stream parts.', nargs=1,type=str);
+
     main_flags_exclusive_group.add_argument('-cc','--concat', help='provide .mp4 file name/s (part/s) path/s to input for concat it to 1 video; this flag is usefull in situations when you have several already converted(merged) .mp4 videos (4ex., several parts of 1 whole videostream, downloaded and merged via separate chunklists). Note: video parts will be provided to concat in the sequence of arguments.', nargs='+')
 
     parser.add_argument('-cl','--clear', help='this flag is context-depended: in \'--merge\' stage: clear chunks folder after converting successfully finished; with \'--concat\': deleted source files IF concat operation was [successful]; ignoring if \'--download\' flag is used.',action='store_true')
@@ -452,9 +456,9 @@ if __name__ == "__main__":
     download_params_group = parser.add_argument_group('Download raw chunks options','This options group included some [exclusive] parameters for "--download" stage.')
     download_raw_chunks_options_ex_group=download_params_group.add_mutually_exclusive_group(required=False)
     
-    download_raw_chunks_options_ex_group.add_argument('--download-missing-only', help='Existing raw .ts files chunks in \'--rawDir\' (if any) will be preserved without rewriting. Note: this method [guarantees] that it\'s only download missing chunks from list, BUT it\'s nothing to do with [partially downloaded] files. Use it if you don\'t care about file integrity/completeness, or you sure of this in advance.',action='store_true')
+    download_raw_chunks_options_ex_group.add_argument('--download-missing-only', help='Existing raw files chunks in \'--rawDir\' (if any) will be preserved without rewriting. Note: this method [guarantees] that it\'s only download missing chunks from list, BUT it\'s nothing to do with [partially downloaded] files. Use it if you don\'t care about file integrity/completeness, or you sure of this in advance.',action='store_true')
     
-    download_raw_chunks_options_ex_group.add_argument('--continue-interrupted-download', help='Partially downloaded or corrupted raw .ts chunks files of [previous failed/interrupted download] will be re-downloaded from chunks-list (along with missing ones), with replacement of existing. Note: use this method [ONLY] if previous download of chunk-list\'s raw files has been interrupted or failed at some progress stage; otherwise correct output not guaranteed.',action='store_true')
+    download_raw_chunks_options_ex_group.add_argument('--continue-interrupted-download', help='Partially downloaded or corrupted raw chunks files of [previous failed/interrupted download] will be re-downloaded from chunks-list (along with missing ones), with replacement of existing. Note: use this method [ONLY] if previous download of chunk-list\'s raw files has been interrupted or failed at some progress stage; otherwise correct output not guaranteed.',action='store_true')
 
     
     merge_params_group = parser.add_argument_group('Merge options','This options group is for "--merge" stage, and also for \'--concat\' option.')
@@ -467,6 +471,16 @@ if __name__ == "__main__":
     merge_params_ex_group.add_argument('--mov', help='set this parameter for \'--merge\' stage (or when you use \'--concat\' option), if you want to use \'.mov\' container format for your output formatting instead of \'.mp4\'.',action='store_true')
 
     merge_params_ex_group.add_argument('--avi', help='set this parameter for \'--merge\' stage (or when you use \'--concat\' option), if you want to use \'.avi\' container format for your output formatting instead of \'.mp4\'.',action='store_true')
+
+    merge_params_ex_group.add_argument('--mp4', help='default parameter of output video container format for \'--merge\' stage (or when you use \'--concat\' option).',action='store_true')
+
+    merge_params_ex_group.add_argument('--aac', help='set this parameter for \'--merge\' stage (or when you use \'--concat\' option), if you want to use \'.aac\' container format (audio) for your output formatting instead of \'.mp4\'.',action='store_true')
+
+    merge_params_ex_group.add_argument('--mp3', help='set this parameter for \'--merge\' stage (or when you use \'--concat\' option), if you want to use \'.mp3\' container format (audio) for your output formatting instead of \'.mp4\'.',action='store_true')
+
+    merge_params_ex_group.add_argument('--flac', help='set this parameter for \'--merge\' stage (or when you use \'--concat\' option), if you want to use \'.flac\' container format (audio) for your output formatting instead of \'.mp4\'.',action='store_true')
+
+    merge_params_ex_group.add_argument('--wav', help='set this parameter for \'--merge\' stage (or when you use \'--concat\' option), if you want to use \'.wav\' container format (audio) for your output formatting instead of \'.mp4\'.',action='store_true')
 
     args = parser.parse_args()
 
@@ -481,8 +495,21 @@ if __name__ == "__main__":
         __ext='.mov'
     elif args.avi:
         __ext='.avi'
-    #else:
-    #    __ext='.mp4'
+    elif args.mp4:
+        __ext='.mp4'
+    elif args.aac:
+        __ext='.aac'
+    elif args.mp3:
+        __ext='.mp3'
+    elif args.flac:
+        __ext='.flac'
+    elif args.wav:
+        __ext='.wav'
+
+    if args.customRaw:
+        __raw_ext=f"{' '.join(args.customRaw)}"
+
+    print(f'__raw_ext=={__raw_ext}')
 
     OUTPUT_NAME=f"{' '.join(args.output)}" # output .mp4 file name
 
@@ -498,7 +525,7 @@ if __name__ == "__main__":
         RAW_DATA_DIR=newPath
         if (args.clear and args.merge) or (args.url and (not args.download or (args.download and not args.continue_interrupted_download and not args.download_missing_only))) :
             print('')
-            if not yes_or_no(f'[WARNING] all existing .ts files in {RAW_DATA_DIR} (if any) will be deleted. Continue?'):
+            if not yes_or_no(f'[WARNING] all existing chunks files in {RAW_DATA_DIR} (if any) will be deleted. Continue?'):
                 print('Abort..')
                 sys.exit(0)
 
@@ -526,7 +553,7 @@ if __name__ == "__main__":
         if not download_chunks(f'{URL}',args.allow_failed_snippets,args.download_missing_only, args.continue_interrupted_download): # if download failed
             print(">> Abort download..")
             if args.clear:
-                remove_files(RAW_DATA_DIR,'.ts')   
+                remove_files(RAW_DATA_DIR,__raw_ext)   
             exit()
 
 
