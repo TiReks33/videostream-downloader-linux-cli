@@ -11,6 +11,9 @@ import argparse
 import pathlib
 from posixpath import join as posixjoin
 
+_D="[DEBUG]"
+_SH="[ShellEscape]"
+
 _NAME='videostream-downloader-linux-cli'
 
 _PLATFORM=sys.platform
@@ -84,13 +87,28 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
 
     chunklist_f_name = chunklist_url.split("/")[-1]
 
-    fat_ntfs_illegal = ['?','NUL','\',''//',':','*','"','<','>','|']
- 
+    print(f"{_D} chunklist_f_name=={chunklist_f_name};")
+
+    #fat_ntfs_illegal = ['?','NUL','\',''//',':','*','"','<','>','|']
+
+    fat_ntfs_illegal = ['?','NUL','\\','/',':','*','"','<','>','|']
+
+
+    print(f"{_D} fat_ntfs_illegal=={'<->'.join(fat_ntfs_illegal)}")
+
     for il in fat_ntfs_illegal:
         chunklist_f_name = chunklist_f_name.replace(il, '')
 
+    print(f"{_D} chunklist_f_name=={chunklist_f_name}")
+
     chunklist_path = os.path.join(TEMP_DIR, chunklist_f_name)
+    
+    print(f"{_D} chunklist_path=={chunklist_path}")
+
     downl_chunklist = f"wget --quiet {chunklist_url} -O {STEMP_DIR}/{chunklist_f_name}"
+
+    print(f"{_D} {_SH} downl_chunklist=={downl_chunklist}")
+
     wget_call_exit_code = os.system(downl_chunklist)
     
     if wget_call_exit_code != 0:
@@ -152,8 +170,16 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
 
     for i, c in enumerate(url_chunks):
         urlPortion=" ".join(c)
+
+        #print(f"\n{_D} urlPortion=={urlPortion}\n")
+
         # check urls not empty
         if urlPortion.strip() :
+             
+             urlPortionWgetCommand4Debug = f"wget {add_opt} --quiet " + urlPortion + f" -P {SRAW_DATA_DIR} 2>>{SDOWNLOAD_ERRORS_LOG_F}"
+             
+             #print(f'\n{_D} urlPortionWgetCommand4Debug=={urlPortionWgetCommand4Debug}\n')
+             
              wget_call_exit_code = os.system(
              f"wget {add_opt} --quiet " + urlPortion + f" -P {SRAW_DATA_DIR} 2>>{SDOWNLOAD_ERRORS_LOG_F}"
             )
@@ -447,6 +473,9 @@ if __name__ == "__main__":
 
     main_flags_exclusive_group.add_argument('-cc','--concat', help='provide .mp4 file name/s (part/s) path/s to input for concat it to 1 video; this flag is usefull in situations when you have several already converted(merged) .mp4 videos (4ex., several parts of 1 whole videostream, downloaded and merged via separate chunklists). Note: video parts will be provided to concat in the sequence of arguments.', nargs='+')
 
+
+    #main_flags_exclusive_group.add_argument('--debug', help='', action='store_true')
+
     parser.add_argument('-cl','--clear', help='this flag is context-depended: in \'--merge\' stage: clear chunks folder after converting successfully finished; with \'--concat\': deleted source files IF concat operation was [successful]; ignoring if \'--download\' flag is used.',action='store_true')
 
     parser.add_argument('--outputDir', help='replace default output .mp4 file dir by this path', nargs=1,type=str)
@@ -509,7 +538,18 @@ if __name__ == "__main__":
     if args.customRaw:
         __raw_ext=f"{' '.join(args.customRaw)}"
 
-    print(f'\nCurrent raw videostream chunks format -> \'{__raw_ext}\'')
+    #print(f'os.get_terminal_size().columns::{os.get_terminal_size().columns}')
+    #print(f"type of os.get_terminal_size().columns::{type(os.get_terminal_size().columns)}")
+
+    print(f"{'*'*os.get_terminal_size().columns}")
+
+    if not args.concat :
+        print(f'Current raw videostream chunks format -> \'{__raw_ext}\'')
+    
+    print(f'Current output file format -> \'{__ext}\'')
+
+    #if args.debug :
+    #    sys.exit(0)
 
     OUTPUT_NAME=f"{' '.join(args.output)}" # output .mp4 file name
 
@@ -520,10 +560,16 @@ if __name__ == "__main__":
 
     if args.rawDir:
         newPath=f"{' '.join(args.rawDir)}"
+        
+        Path_ = pathlib.Path(newPath)
 
-        pathlib.Path(newPath).mkdir(parents=True, exist_ok=True) 
+        PathExists = Path_.exists()
+
+        Path_.mkdir(parents=True, exist_ok=True) 
+        
         RAW_DATA_DIR=newPath
-        if (args.clear and args.merge) or (args.url and (not args.download or (args.download and not args.continue_interrupted_download and not args.download_missing_only))) :
+        
+        if ((args.clear and args.merge) or (args.url and (not args.download or (args.download and not args.continue_interrupted_download and not args.download_missing_only))) and PathExists) :
             print('')
             if not yes_or_no(f'[WARNING] all existing chunks files in {RAW_DATA_DIR} (if any) will be deleted. Continue?'):
                 print('Abort..')
