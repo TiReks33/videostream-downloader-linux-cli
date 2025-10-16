@@ -509,7 +509,7 @@ if __name__ == "__main__":
     if args.customRaw:
         __raw_ext=f"{' '.join(args.customRaw)}"
 
-    print(f'__raw_ext=={__raw_ext}')
+    print(f'\nCurrent raw videostream chunks format -> \'{__raw_ext}\'')
 
     OUTPUT_NAME=f"{' '.join(args.output)}" # output .mp4 file name
 
