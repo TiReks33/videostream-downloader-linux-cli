@@ -66,8 +66,17 @@ def getFilesInDir(path:str) ->list:
         if os.path.isfile(os.path.join(f'{path}', file)):
             yield file
 
-def shellSpaceEscape(entry:str)->str:
-    return entry.strip().replace(' ','\ ')
+def shellSpaceEscape(single_entrie: str) -> str :
+    return single_entrie.strip().replace("\\","\\\\").replace(' ','\ ') 
+
+#def shellSpaceEscape(multiply_entries: list) -> list :
+#    return = [shellSpaceEscape(el) for el in multiply_entries]
+
+def shellSpaceEscape_revert(escaped_single_entrie: str) -> str :
+    return escaped_single_entrie.replace('\ ',' ').replace("\\\\","\\")
+
+#def shellSpaceEscape_revert(multiply_entries: list) -> list :
+#    return = [shellSpaceEscape_revert(el) for el in multiply_entries]
 
 def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_existing_chunks: bool=False, continue_previous: bool=False):
 
@@ -82,32 +91,18 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
  
     print(">> Processing..")
 
-    # chunklist
     print(">> Downloading chunklist..")
 
     chunklist_f_name = chunklist_url.split("/")[-1]
 
-    print(f"{_D} chunklist_f_name=={chunklist_f_name};")
-
-    #fat_ntfs_illegal = ['?','NUL','\',''//',':','*','"','<','>','|']
-
     fat_ntfs_illegal = ['?','NUL','\\','/',':','*','"','<','>','|']
-
-
-    print(f"{_D} fat_ntfs_illegal=={'<->'.join(fat_ntfs_illegal)}")
 
     for il in fat_ntfs_illegal:
         chunklist_f_name = chunklist_f_name.replace(il, '')
 
-    print(f"{_D} chunklist_f_name=={chunklist_f_name}")
-
     chunklist_path = os.path.join(TEMP_DIR, chunklist_f_name)
     
-    print(f"{_D} chunklist_path=={chunklist_path}")
-
     downl_chunklist = f"wget --quiet {chunklist_url} -O {STEMP_DIR}/{chunklist_f_name}"
-
-    print(f"{_D} {_SH} downl_chunklist=={downl_chunklist}")
 
     wget_call_exit_code = os.system(downl_chunklist)
     
@@ -123,7 +118,6 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
     base_url = "/".join(chunklist_url.split("/")[:-1])
     file_pattern = re.compile(f"[^\n].*\{__raw_ext}")
     raw_file_list = list(sorted(re.findall(file_pattern, chunklist)))
-
 
     if keep_existing_chunks : 
         existing_files_in_raw_dir=list(getFilesInDir(RAW_DATA_DIR))
@@ -159,7 +153,11 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
         remove_files(RAW_DATA_DIR,f"{__raw_ext}")   
 
     # remove downloads log file    
-    remove_file(DOWNLOAD_ERRORS_LOG_F) 
+    if pathlib.Path(DOWNLOAD_ERRORS_LOG_F).is_file() :
+        # if file exists :
+        remove_file(DOWNLOAD_ERRORS_LOG_F) 
+    #else :
+    #    print(DOWNLOAD_ERRORS_LOG_F + " doesn't exist")
 
     print(">> Downloading chunks files..")
 
@@ -171,15 +169,9 @@ def download_chunks(chunklist_url: str, skip_corrupted_snippets=False, keep_exis
     for i, c in enumerate(url_chunks):
         urlPortion=" ".join(c)
 
-        #print(f"\n{_D} urlPortion=={urlPortion}\n")
-
         # check urls not empty
         if urlPortion.strip() :
-             
-             urlPortionWgetCommand4Debug = f"wget {add_opt} --quiet " + urlPortion + f" -P {SRAW_DATA_DIR} 2>>{SDOWNLOAD_ERRORS_LOG_F}"
-             
-             #print(f'\n{_D} urlPortionWgetCommand4Debug=={urlPortionWgetCommand4Debug}\n')
-             
+              
              wget_call_exit_code = os.system(
              f"wget {add_opt} --quiet " + urlPortion + f" -P {SRAW_DATA_DIR} 2>>{SDOWNLOAD_ERRORS_LOG_F}"
             )
@@ -359,7 +351,7 @@ def merge2mp4(title: str, clear_raw: bool=False):
 
         # case if only 1 raw file gets merged
         if len(partLis) == 1 :
-            print(f"Nothing to merge -- there is only one {__ext_raw} file already in {RAW_DATA_DIR}.")
+            print(f"Nothing to merge -- there is only one {__raw_ext} file already in {RAW_DATA_DIR}.")
             sys.exit(1)
 
         else :
@@ -387,7 +379,7 @@ def merge2mp4(title: str, clear_raw: bool=False):
                 print(cc_error)
                 sys.exit(1)      
 
-            exit_code=concatvideos([shellSpaceEscape(__tPath)],title,overwrite_out_file,True)
+            exit_code=concatvideos([__tPath],title,overwrite_out_file,True)
             
 
     if exit_code == 0:
@@ -402,12 +394,16 @@ def concatvideos(files_list: list, outputfname: str, overwrite_existing: bool=Fa
         
     entries_len=len(files_list)
 
-    videolist_tempfname=f'{DATA_DIR}/videolist.txt'
-    
+    escaped_list = [shellSpaceEscape(e) for e in files_list]
+
+
+    videolist_tempfname=f'{DATA_DIR}/videolist.txt'    
+
 
     with open(videolist_tempfname,"a") as videolistfile:
         for i in range(entries_len):
-            fullfpath_command=f"realpath {files_list[i]}"
+            #fullfpath_command=f"realpath {files_list[i]}"
+            fullfpath_command=f"realpath {escaped_list[i]}"
             get_videofrealpath=subprocess.run(fullfpath_command, capture_output=True, shell=True)
             videofrealpath=get_videofrealpath.stdout.decode('utf-8').strip()
             data2append=f"file '{videofrealpath}'"
@@ -439,10 +435,9 @@ def concatvideos(files_list: list, outputfname: str, overwrite_existing: bool=Fa
 
 def remove_file(FPATH: str) -> None:
     try:
-        #print(f"File will be removed: {FPATH}")
         os.remove(f"{FPATH}")
     except OSError:
-        #print(f"Error while removing file: {FPATH}")
+        print(f"Error while removing file: {FPATH}")
         pass
 
 def remove_files(DIR: str, EXT: str) -> None:
@@ -464,7 +459,7 @@ if __name__ == "__main__":
     main_flags_exclusive_group.add_argument('-u','--url', help='pass URL of chunklist here',type=str,nargs=1)
     main_flags_exclusive_group.add_argument('-m','--merge', help='flag to only merge existing(in \'raw\' subdir) chunks to output formatted file without downloading',action='store_true')
 
-    parser.add_argument('-o','--output', help='output .mp4 file name (white-spaces and not-latin characters (4ex., cyrillic etc.) supported)',nargs='+',default=['output_video'])
+    parser.add_argument('-o','--output', help='output .mp4 file name (white-spaces and not-latin characters (4ex., cyrillic etc.) supported)',nargs='+',default=['output_file'])
     parser.add_argument('-d','--download',help='flag to only download chunklist without merging to video-file (will be ignored with \'--merge\' or \'--concat\' flags)',action='store_true')
 
     parser.add_argument('-a','--allow-failed-snippets',help='this flag skips script terminating after \'wget\' failed to download a (corrupted) videosnippet',action='store_true')
@@ -538,18 +533,14 @@ if __name__ == "__main__":
     if args.customRaw:
         __raw_ext=f"{' '.join(args.customRaw)}"
 
-    #print(f'os.get_terminal_size().columns::{os.get_terminal_size().columns}')
-    #print(f"type of os.get_terminal_size().columns::{type(os.get_terminal_size().columns)}")
-
+    # first line of stars, amount of width of current terminal
     print(f"{'*'*os.get_terminal_size().columns}")
 
     if not args.concat :
         print(f'Current raw videostream chunks format -> \'{__raw_ext}\'')
     
-    print(f'Current output file format -> \'{__ext}\'')
-
-    #if args.debug :
-    #    sys.exit(0)
+    if not args.download :
+        print(f'Current output file format -> \'{__ext}\'')
 
     OUTPUT_NAME=f"{' '.join(args.output)}" # output .mp4 file name
 
@@ -584,8 +575,9 @@ if __name__ == "__main__":
     #concat several videofiles to 1 
     if args.concat:
         print('[Concat existing videos]')
-        args.concat=[shellSpaceEscape(e) for e in args.concat]
-        ccres = concatvideos(args.concat,f'{OUTPUT_NAME}',False)
+        #args.concat=[shellSpaceEscape(e) for e in args.concat]
+        
+        ccres = concatvideos(args.concat,f'{OUTPUT_NAME}')#, False, True)
         if ccres == 0:
             print(_OK + f" ffmpeg concat to {__ext} successfuly finished. Output: '{DATA_DIR}/{OUTPUT_NAME}{__ext}'")
         else:
