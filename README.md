@@ -1,8 +1,12 @@
 # ::[videostream-downloader-linux-cli[v0.89]]::
 ## Description
-Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 or other container format if video/audio files (by ffmpeg). Testing on Linux Debian OS 11.6 && FreeBSD 13.2.
+Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 or other container format of video/audio files (by ffmpeg). Testing on Linux Debian OS 11.6 && FreeBSD 13.2.
 ## Depends
 wget, ffmpeg, Python interpreter (testing on Python 3.9.2)
+  
+**Please note before use this software**:
+> ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this programm from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
+  
 ## Usage
 Copy-paste your transport video's chunklist URL adress and put it as '--url'('-u') argument. This can be done by next method:  
 
@@ -111,5 +115,5 @@ foo@bar:~$ python3 videostream-downloader-linux-cli.py --tracks-overlay ~/__VIDE
 foo@bar:~$ python3 videostream-downloader-linux-cli.py --convert ~/__VIDEOSTREAM_DOWNLOADER_OUTPUT__/123testA.mp4 -o 123testA_reencoded --avi --reencode
 ```
 
-**Please note before use this software**:
-> ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this programm from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
+
+
