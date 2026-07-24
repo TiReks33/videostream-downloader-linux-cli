@@ -1,6 +1,6 @@
-# videostream-downloader-linux-cli
+# ::[videostream-downloader-linux-cli[v0.89]]::
 ## Description
-Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 (or other container format) video-file (by ffmpeg). Testing on Linux Debian OS 11.6 && FreeBSD 13.2.
+Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 or other container format if video/audio files (by ffmpeg). Testing on Linux Debian OS 11.6 && FreeBSD 13.2.
 ## Depends
 wget, ffmpeg, Python interpreter (testing on Python 3.9.2)
 ## Usage
@@ -17,6 +17,8 @@ If previous download of chunks from list failed, you can set '--continue-interru
 ```
   -h, --help            show this help message and exit  
   -u URL, --url URL     pass URL of chunklist here  
+  -rtb RUTUBE RUTUBE,   --rutube RUTUBE RUTUBE
+                        resolve URL of resource. Takes 2 parameters: 1) resource url (to resolve it to .m3u8 link), 2) preffered video quality ('480p','720p', etc.).  
   -m, --merge           flag to only merge existing(in 'raw' subdir) .ts chunks to .mp4 file without downloading  
   -o OUTPUT [OUTPUT ...], --output OUTPUT [OUTPUT ...]  
                         output .mp4 file name (white-spaces and not-latin characters (4ex., cyrillic etc.) supported)  
@@ -24,18 +26,27 @@ If previous download of chunks from list failed, you can set '--continue-interru
                         or '--concat' flags)  
   -a, --allow-failed-snippets  
                         this flag skips script terminating after 'wget' failed to download a (corrupted) videosnippet  
+  --customRaw CUSTOMRAW
+                        custom format extension for raw chunks instead of '.ts' (4ex., '.aac' audio stream parts).  
   -cc CONCAT [CONCAT ...], --concat CONCAT [CONCAT ...]  
                         provide .mp4 file name/s (part/s) path/s to input for concat it to 1 video; this flag is usefull
                         in situations when you have several already converted(merged) .mp4
                         videos (4ex., several parts of 1 whole videostream, downloaded and merged via separate
                         chunklists). Note: video parts will be provided to concat in the sequence of arguments.  
-  -cl, --clear          clear chunks folder after converting successfully finished (ignoring if '--download' flag is
-                        used)  
+  
+  -t TRACKS_OVERLAY TRACKS_OVERLAY, --tracks-overlay TRACKS_OVERLAY TRACKS_OVERLAY
+                        provide file/s (part/s) path/s of track/s for overlaying them 1 on 1; this flag can be usefull in situations when you have 2 separate parts of 1 media entity (4ex., audio- and video- separated parts of '.m4s' video), and you need to unite them to 1 monolitic file (with one-on-one overlay).  
+  
+  --convert CONVERT     provide input file to convert to specific output format via ffmpeg (format can be specified by '--{format}' flag (see '--help' for all available formats list).  
+  
+  -cl, --clear          clear chunks folder after converting successfully finished (ignoring if '--download' flag is used)  
+  
   --outputDir OUTPUTDIR  
                         replace default output .mp4 file dir by this path  
   --rawDir RAWDIR       replace default raw chunks dir by this path  
   --tempDir TEMPDIR     replace default temporary files dir by this path  
-
+  -y, --yes-please      "Technical" flag. This flag is for skipping (automaticly confirming) question dialogs (4ex., about overwriting directory).[WARNING]: if this flag is set, You will lose the possibility to rename a file if it already exists; it will be forcibly replaced.  
+    
 Download raw chunks options:  
   This options group included some [exclusive] parameters for "--download" stage.  
 
@@ -49,18 +60,24 @@ Download raw chunks options:
                         will be re-downloaded from chunks-list (along with missing ones), with replacement of existing.
                         Note: use this method [ONLY] if previous download of chunk-list's raw files has been interrupted
                         or failed at some progress stage; otherwise correct output not guaranteed.  
-
-Merge options:  
-  This options group is for "--merge" stage, and also for '--concat' option.  
-
-  --ts                  set this parameter for '--merge' stage (or when you use '--concat' option), if you want to keep
-                        output file in '.ts' format without converting to '.mp4'.  
-  --mkv                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use
-                        '.mkv' container format for your output formatting instead of '.mp4'.  
-  --mov                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use
-                        '.mov' container format for your output formatting instead of '.mp4'.  
-  --avi                 set this parameter for '--merge' stage (or when you use '--concat' option), if you want to use
-                        '.avi' container format for your output formatting instead of '.mp4'.
+Convert additional flags group:  
+  This group included some flags for "--convert" parameter.
+  
+  --reencode            If this flag is set, output file's audio/video frames will be reencoded (quality of output video/audio may be differ than source). [Note]: this much longer operation then copying existing frames from input source; more rational use of this is only in case if execution of '--convert' without this flag gives output file of specified format not in satisfying state (4ex., video sequence of output is freezes/in low frame rate etc.).  
+  
+Output formats:  
+  This options group is for '--merge' stage, and also for '--concat', '--tracks-overlay', '--convert' options; specify output data formatting (default is '.mp4').  
+  
+  --ts                  set this parameter if you want to use '.ts' format for your output data.  
+  --m4s                 set this parameter if you want to use '.m4s' format for your output data.  
+  --mkv                 set this parameter if you want to use '.mkv' format for your output data.  
+  --mov                 set this parameter if you want to use '.mov' format for your output data.  
+  --avi                 set this parameter if you want to use '.avi' format for your output data.  
+  --mp4                 set this parameter if you want to use '.mp4' format for your output data.  
+  --aac                 set this parameter if you want to use '.aac' format for your output data.  
+  --mp3                 set this parameter if you want to use '.mp3' format for your output data.  
+  --flac                set this parameter if you want to use '.flac' format for your output data.  
+  --wav                 set this parameter if you want to use '.wav' format for your output data.  
   
 ```
 ## Example usage
@@ -84,6 +101,15 @@ foo@bar:~$ python3 videostream-downloader-linux-cli.py --rawDir /path/to/raw/ts/
 ```console
 foo@bar:~$ python3 videostream-downloader-linux-cli.py -m -o outputName --mkv --outputDir /some/path/to/output/ --clear
 ```
+```console
+foo@bar:~$ python3 videostream-downloader-linux-cli.py -u https://example_url1/video.mp4/v1/index.m3u8 https://example_url1/video.mp4/a1/index.m3u8             --customRaw=m4s --output 123test -cl -y
+```
+```console
+foo@bar:~$ python3 videostream-downloader-linux-cli.py --tracks-overlay ~/__VIDEOSTREAM_DOWNLOADER_OUTPUT__/123testA0.m4s ~/__VIDEOSTREAM_DOWNLOADER_OUTPUT__/123testA1.m4s --output 123TestA --mkv
+```
+```console
+foo@bar:~$ python3 videostream-downloader-linux-cli.py --convert ~/__VIDEOSTREAM_DOWNLOADER_OUTPUT__/123testA.mp4 -o 123testA_reencoded --avi --reencode
+```
 
-
-
+**Please note before use this software**:
+> ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this programm from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
