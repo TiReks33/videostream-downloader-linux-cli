@@ -1,22 +1,29 @@
 # ::[videostream-downloader-linux-cli[v0.89]]::
 ## Description
-Downloads input chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to .mp4 or other container format of video/audio files (by ffmpeg). Testing on Linux Debian OS 11.6 && FreeBSD 13.2.
+Downloads input chunklist(.m3u8) of media transport stream by its URL and converts raw fragments to .mp4/.mp3 or other container format of video/audio files (by ffmpeg). Testing on Linux Debian OS 11.6 && FreeBSD 13.2.
 ## Depends
 wget, ffmpeg, Python interpreter (testing on Python 3.9.2)
   
-**Please note before use this software**:
-> ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this programm from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
-  
 ## Usage
-Copy-paste your transport video's chunklist URL adress and put it as '--url'('-u') argument. This can be done by next method:  
+Copy-paste your transport media's chunklist URL adress and put it as '--url'('-u') argument. This can be done by next method:  
 
 [Instruction](videostream-downloader-instr.gif)  
-
-You can only download raw materials for future converting by putting '-d'('--download') flag (raw .ts fragments can be found in '$HOME/\_\_VIDEOSTREAM_DOWNLOADER_OUTPUT\_\_/raw/' folder by default). And, accordingly, if chunks already presents in 'raw/' folder, you can merge it without re-download by '-m'('--merge') flag.  
+  
+---
+**Please note before use this software**:
+> ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this programm from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
+---
+  
+You can only download raw materials for future converting by putting '-d'('--download') flag (raw '.ts'/'.m4s' fragments can be found in  
+> '$HOME/\_\_VIDEOSTREAM_DOWNLOADER_OUTPUT\_\_/raw/'
+  
+folder by default). And, accordingly, if chunks already presents in 'raw/' folder, you can merge it without re-download by '-m'('--merge') flag.  
 If network is unstable, or videosnippets presented in chunklist is corrupted etc., you can set '--allow-failed-snippets'('-a') flag to avoid terminating of snippets download after first fail.  
 You may concat several videofiles files in 1 with '--concat'('-cc') flag with providing a videofiles paths you want to concat (this may very usefull if whole videostream is divided into several separated chunklists, and with this option you may 'recover' original video from separated parts).  
 Default paths can be overrided by '--outputDir', '--rawDir', '--tempDir' flags.
-If previous download of chunks from list failed, you can set '--continue-interrupted-download' or 'download-missing-only' flag.   
+If previous download of chunks from list failed, you can set '--continue-interrupted-download' or '--download-missing-only' flag.  
+For more options see 'CLI args'.
+  
 ### CLI args  
 ```
   -h, --help            show this help message and exit  
@@ -48,7 +55,8 @@ If previous download of chunks from list failed, you can set '--continue-interru
   --outputDir OUTPUTDIR  
                         replace default output .mp4 file dir by this path  
   --rawDir RAWDIR       replace default raw chunks dir by this path  
-  --tempDir TEMPDIR     replace default temporary files dir by this path  
+  --tempDir TEMPDIR     replace default temporary files dir by this path
+  
   -y, --yes-please      "Technical" flag. This flag is for skipping (automaticly confirming) question dialogs (4ex., about overwriting directory).[WARNING]: if this flag is set, You will lose the possibility to rename a file if it already exists; it will be forcibly replaced.  
     
 Download raw chunks options:  
@@ -106,7 +114,7 @@ foo@bar:~$ python3 videostream-downloader-linux-cli.py --rawDir /path/to/raw/ts/
 foo@bar:~$ python3 videostream-downloader-linux-cli.py -m -o outputName --mkv --outputDir /some/path/to/output/ --clear
 ```
 ```console
-foo@bar:~$ python3 videostream-downloader-linux-cli.py -u https://example_url1/video.mp4/v1/index.m3u8 https://example_url1/video.mp4/a1/index.m3u8             --customRaw=m4s --output 123test -cl -y
+foo@bar:~$ python3 videostream-downloader-linux-cli.py -u https://example_url1/video.mp4/v1/index.m3u8 https://example_url1/video.mp4/a1/index.m3u8  --customRaw=m4s --output 123test -cl -y
 ```
 ```console
 foo@bar:~$ python3 videostream-downloader-linux-cli.py --tracks-overlay ~/__VIDEOSTREAM_DOWNLOADER_OUTPUT__/123testA0.m4s ~/__VIDEOSTREAM_DOWNLOADER_OUTPUT__/123testA1.m4s --output 123TestA --mkv
