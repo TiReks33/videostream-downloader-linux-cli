@@ -5,15 +5,14 @@ Downloads input chunklist(.m3u8) of media transport stream by its URL and conver
 wget, ffmpeg, Python interpreter (testing on Python 3.9.2)
   
 ## Usage
-Copy-paste your transport media's chunklist URL adress and put it as '--url'('-u') argument. This can be done by next method:  
-
-[Instruction](videostream-downloader-instr.gif)  
-  
 ---
 **Please note before use this software**:
 > ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this programm from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
 ---
+Copy-paste your transport media's chunklist URL adress and put it as '--url'('-u') argument. This can be done by next method:  
   
+[Instruction](videostream-downloader-instr.gif)  
+    
 You can only download raw materials for future converting by putting '-d'('--download') flag (raw '.ts'/'.m4s' fragments can be found in  
 > '$HOME/\_\_VIDEOSTREAM_DOWNLOADER_OUTPUT\_\_/raw/'
   
