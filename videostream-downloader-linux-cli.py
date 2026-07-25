@@ -1,4 +1,4 @@
-#!/bin/python3.9
+#!/bin/python3
 
 _NAME='videostream-downloader-linux-cli'
 curVer = "[v0.89]"
@@ -12,15 +12,14 @@ import subprocess
 import argparse
 import pathlib
 from threading import Thread
-from enum import Enum
+from enum import Enum, EnumMeta
 from argparse import RawTextHelpFormatter
 import copy
 from multiprocessing.pool import ThreadPool
 import time
 from aenum import NamedConstant
 import threading
-import requests
-from fake_headers import Headers
+
 
 try:
     from pRTB import get_rtb_src
@@ -91,7 +90,8 @@ class ext_enum(str, Enum):
     flac  = 'flac'
     wav   = 'wav'
 
-
+    def __str__(self) -> str:
+        return str.__str__(self)
 
 
 # size in bytes
@@ -153,7 +153,7 @@ def getFilesInDir(path:str) ->list:
 
 
 def shellSpaceEscape(single_entrie: str) -> str :
-    return single_entrie.strip().replace("\\","\\\\").replace(' ','\ ') 
+    return single_entrie.strip().replace("\\","\\\\").replace(' ','\\ ') 
 
 
 class QuoteType(Enum) :
@@ -162,8 +162,8 @@ class QuoteType(Enum) :
 
 def shellEscape(single_entrie: str, qtype : QuoteType) -> str :
     if qtype == QuoteType.Single :
-        return single_entrie.strip().replace("\\","\\\\").replace(' ','\ ').replace("'","\'").replace('(','\(').replace(')','\)')         
-    return single_entrie.strip().replace("\\","\\\\").replace(' ','\ ').replace('"','\"').replace('(','\(').replace(')','\)')
+        return single_entrie.strip().replace("\\","\\\\").replace(' ','\\ ').replace("'","\'").replace('(','\\(').replace(')','\\)')         
+    return single_entrie.strip().replace("\\","\\\\").replace(' ','\\ ').replace('"','\"').replace('(','\\(').replace(')','\\)')
 
 
 # quote string with corresponding quote-symbols escaping 
@@ -252,7 +252,7 @@ def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippe
     # download all chunks files
     tprint(">> Grouping chunks..")
     base_url = "/".join(chunklist_url.split("/")[:-1])
-    file_pattern = re.compile(f"[^\n].*\{__raw_ext}")
+    file_pattern = re.compile(f"[^\n].*\\{__raw_ext}")
     raw_file_list = list(sorted(re.findall(file_pattern, chunklist)))
 
 
@@ -874,7 +874,7 @@ def get_curr_output_format(args: argparse.Namespace) -> str :
     args_dict = vars(args)
     for arg_ in args_dict :
         for el in ext_enum :
-            if str(arg_) == str(el.value) :
+            if str(arg_) == str(el) :#.value) :
                 if args_dict[arg_] :
                     return str(el.value)
 
@@ -1012,7 +1012,7 @@ def get_args() -> argparse.Namespace :
 
     parser = argparse.ArgumentParser(prog=_NAME, description=f'::[{_NAME + curVer}]:: Downloads input ' \
         f'chunklist(.m3u8) of transport stream video by its URL and converts raw fragments to \'.mp4\' (or ' \
-            f'other available format) file.', epilog = '[Hint]: if result of \'--concat\' or \'--tracks-overlay\' ' \
+            f'other available format) file. Also suitable for audio streams.', epilog = '[Hint]: if result of \'--concat\' or \'--tracks-overlay\' ' \
                 f'operation is NOT successful, or output result is not in satisfied state, it may be helpful to convert ' \
                     f'input file argument/s to another suitable format first, depending on the context. This can be reached by ' \
                         f'executing a program with \'--convert\' parameter; list of available output formats shown upper above (default ' \
