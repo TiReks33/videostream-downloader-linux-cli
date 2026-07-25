@@ -1,7 +1,7 @@
 #!/bin/python3
 
 _NAME='videostream-downloader-linux-cli'
-curVer = "[v0.89]"
+curVer = "[v0.89b]"
 
 from types import SimpleNamespace
 import os
@@ -47,16 +47,11 @@ HOME = os.path.expanduser("~")
    
 DATA_DIR = os.path.dirname(f'{HOME}/__VIDEOSTREAM_DOWNLOADER_OUTPUT__/')
 
-#RAW_DATA_DIR = os.path.join(DATA_DIR, "raw")
-
 TEMP_DIR = DATA_DIR
 
 DOWNLOAD_ERRORS_LOG_F = f'{TEMP_DIR}/last_download_errors.log'
 
-
 __raw_ext='.ts'
-
-#__ext='.mp4'
 
 
 def get_pid() -> int :
@@ -117,8 +112,6 @@ def yes_or_no(question) -> bool :
         return yes_or_no("Please, enter 'yes'(y) or 'no'(n)")
 
 
-##
-
 class Answer(NamedConstant) :
 
     # use 'is' operator to distinguish between values
@@ -139,8 +132,6 @@ def yes_no_abort(question) -> Answer :
         return Answer.Abort
     else:
         return yes_no_abort("Please, enter 'yes'(y), 'no'(n) or 'abort'(a)")
-
-##
 
 
 def prompt(question):
@@ -169,25 +160,10 @@ def shellEscape(single_entrie: str, qtype : QuoteType) -> str :
 # quote string with corresponding quote-symbols escaping 
 # (usefull simple solution for filenames/paths arguments
 # in shell scripts)
-#def Quote(text: str) -> str :#, qtype : QuoteType = QuoteType.Single) -> str :
-##    if qtype == QuoteType.Single :
-##        return "'''" + text.replace("'","\\'") + "'''"         
-#    return '"' + text.replace('"','\\"') + '"'
 def Quote(text: str, qtype : QuoteType = QuoteType.Double) -> str :
     if qtype == QuoteType.Double :
         return '"' + text.replace('"','\\"') + '"'
     return "'" + text.replace("'","\\'") + "'"         
-
-
-
-##def shellSpaceEscape(multiply_entries: list) -> list :
-##    return = [shellSpaceEscape(el) for el in multiply_entries]
-
-#def shellSpaceEscape_revert(escaped_single_entrie: str) -> str :
-#    return escaped_single_entrie.replace('\ ',' ').replace("\\\\","\\")
-
-##def shellSpaceEscape_revert(multiply_entries: list) -> list :
-##    return = [shellSpaceEscape_revert(el) for el in multiply_entries]
 
 
 def remove_fat_ntfs_illegal_chars(str__: str, chars2replace__: str = ' ') -> str:
@@ -200,7 +176,6 @@ def remove_fat_ntfs_illegal_chars(str__: str, chars2replace__: str = ' ') -> str
 
 
 def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippets=False, keep_existing_chunks: bool=False, continue_previous: bool=False) -> bool :
-
 
     SRAW_DATA_DIR=shellSpaceEscape(RAW_DATA_DIR) # local (arg) instead of global ..
     SDOWNLOAD_ERRORS_LOG_F=shellSpaceEscape(DOWNLOAD_ERRORS_LOG_F)    
@@ -216,20 +191,9 @@ def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippe
 
     chunklist_f_name = "hls_chunklist" # chunklist_url.split("/")[-1]
 
-    #print("chunklist_f_name:", chunklist_f_name[:16])
-
-#    fat_ntfs_illegal = ['?','NUL','\\','/',':','*','"','<','>','|']
-
-#    for il in fat_ntfs_illegal:
-#        chunklist_f_name = chunklist_f_name.replace(il, '')
-
     chunklist_f_name = remove_fat_ntfs_illegal_chars(chunklist_f_name)
 
     chunklist_path = os.path.join(RAW_DATA_DIR, chunklist_f_name)
-
-    #
-    #chunklist_path=chunklist_path[:256]
-    #
 
     downl_chunklist = f"wget '{chunklist_url}' -O {SRAW_DATA_DIR}/{chunklist_f_name}"
 
@@ -241,10 +205,7 @@ def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippe
         print(_FA+" Wget download of chunklist failed (is provided URL correct?).")
         return False
     with open(chunklist_path, "r") as f:
-        chunklist = f.read()#=""# = f.read()
-        #for lin in f:
-        #    chunklist += lin.rstrip('\n')
-        #    chunklist += "1\n"
+        chunklist = f.read()
 
     remove_file(chunklist_path)
 
@@ -271,14 +232,14 @@ def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippe
 
     # remove_metadata_init_file_tag
     for ind, substr in enumerate(raw_file_list) :
-            #
-            # 3.4.13.  EXT-X-MAP (tag, introduced in draft-09 of the HLS spec)
-            #
-            # The EXT-X-MAP tag specifies how to obtain the Transport Stream PAT/  
-            # PMT for the applicable media segment.  It applies to every media 
-            # segment that appears after it in the Playlist until the next EXT-X-  
-            # DISCONTINUITY tag, or until the end of the playlist. 
-            #
+        #
+        # 3.4.13.  EXT-X-MAP (tag, introduced in draft-09 of the HLS spec)
+        #
+        # The EXT-X-MAP tag specifies how to obtain the Transport Stream PAT/  
+        # PMT for the applicable media segment.  It applies to every media 
+        # segment that appears after it in the Playlist until the next EXT-X-  
+        # DISCONTINUITY tag, or until the end of the playlist. 
+        #
         if substr.startswith("#EXT-X-MAP") :
             # Specific pattern
             ch = "=\""
@@ -289,22 +250,12 @@ def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippe
             if ch_index != -1:
                 # Get the substring after the character
                 t_str = substr[ch_index + 2:]
-#                if t_str[-1] == '"' :
-#                    print("LAST CHAR IS QUOTE: '" + t_str + "';")
 
                 # remove leading quote
                 raw_file_list[ind] = t_str[:-1] if t_str[-1] == '"' else t_str
-                
-                ##
-                # mark it as init(?)
-                
+                 
                 raw_file_list[ind] += INIT_F_MARK #"#_init"
 
-
-
-    #file_urls = [
-        #(f if f.startswith("http") else f"{base_url}/{f}") for f in raw_file_list
-    #]
 
     file_urls = []
     new_content = ""
@@ -449,7 +400,6 @@ def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippe
     # defend
 
     
-
     add_opt=""
 
     if continue_previous :
@@ -477,7 +427,6 @@ def download_chunks(chunklist_url: str, RAW_DATA_DIR: str, skip_corrupted_snippe
         else :
 
             tprint("{_D} urls list is empty, nothing to proceed.")
-
 
 
 
@@ -521,7 +470,7 @@ def getAvailableSpaceFromPath(path: str) -> int:
 # old 'merge2mp4'
 def merge2output_format(title: str, __ext: str, RAW_DATA_DIR: str, clear_raw: bool=False, overwrite_out_file: bool = False) -> bool :
 
-    print("DATA DIR==", DATA_DIR)
+    print("DATA_DIR==", DATA_DIR)
     print("RAW_DATA_DIR==", RAW_DATA_DIR)
     print("TEMP_DIR==", TEMP_DIR)
 
@@ -769,7 +718,6 @@ def concatvideos_filter(files_list: list, outputfname: str, __ext: str, overwrit
 
 
 
-
 # ffmpeg concat demuxer
 def concatvideos(files_list: list, outputfname: str, __ext: str, overwrite_existing: bool=False, delete_source_after: bool = False) ->bool :
 
@@ -833,7 +781,6 @@ def ffmpeg_convert(inp_file_path: str, outputfname: str, __ext: str, overwrite_e
 
     result=subprocess.run(command2exec, shell=True)
   
-
 
     if result.returncode == 0 :
         if delete_source_after :
@@ -1065,7 +1012,8 @@ def get_args() -> argparse.Namespace :
     parser.add_argument('--outputDir', help='replace default output .mp4 file dir by this path', nargs=1,type=str)
     parser.add_argument('--rawDir', help='replace default raw chunks dir by this path', nargs=1,type=str)
     parser.add_argument('--tempDir', help='replace default temporary files dir by this path', nargs=1,type=str)
-
+    
+    # spaghetti is so delicious!:)
     
     merge_params_group = parser.add_argument_group('Output formats','This options group is for \'--merge\' stage, and also for \'--concat\', \'--tracks-overlay\', \'--convert\' options; specify output data formatting (default is \'.mp4\').')
     merge_params_ex_group=merge_params_group.add_mutually_exclusive_group(required=False)
@@ -1073,8 +1021,6 @@ def get_args() -> argparse.Namespace :
 
     for el in ext_enum :
         merge_params_ex_group.add_argument(f'--{el}', help=f'set this parameter if you want to use \'.{el}\' format for your output data.',action='store_true', default=False)#bool_)
-
-
 
 
     parser.add_argument('-y','--yes-please',help=f'"Technical" flag. This flag is for skipping (automaticly confirming) question dialogs (4ex., about overwriting directory). \
@@ -1094,32 +1040,19 @@ def get_args() -> argparse.Namespace :
     curr_format = get_curr_output_format(args)
 
 
-
-
     return args
 #defend
 
 
 
 
-
-
-
 def main_logic (args: argparse.Namespace) -> int :
     
-    #global __ext, DATA_DIR, __raw_ext#, RAW_DATA_DIR
-
-
     # '__ext' mustn't be a global var????????????????????????????????????????
+    global DATA_DIR, __raw_ext, TEMP_DIR##, RAW_DATA_DIR
 
-    global DATA_DIR, __raw_ext##, RAW_DATA_DIR
-    #
-    global TEMP_DIR
-    #
 
     __ext = '.' + get_curr_output_format(args)
-
-
 
 
     RAW_DATA_DIR = os.path.join(DATA_DIR, "raw")
@@ -1155,30 +1088,44 @@ def main_logic (args: argparse.Namespace) -> int :
         Path_.mkdir(parents=True, exist_ok=True)
 
 
+    if not os.path.exists(DATA_DIR) :
+        os.makedirs(DATA_DIR)
+
+
+    if args.outputDir:
+        newPath=f"{' '.join(args.outputDir)}" 
+        pathlib.Path(newPath).mkdir(parents=True, exist_ok=True) 
+        DATA_DIR = newPath
+
+
+    if args.tempDir:
+        newPath=f"{' '.join(args.tempDir)}"
+        pathlib.Path(newPath).mkdir(parents=True, exist_ok=True) 
+        TEMP_DIR=newPath
+        DOWNLOAD_ERRORS_LOG_F = f'{TEMP_DIR}/last_download_errors.log'
 
 
     if not args.yes_please :
 
-        if ((args.clear and args.merge) or (args.url and (not args.download or (args.download and not args.continue_interrupted_download and not args.download_missing_only))) and rawDirPathExists) :
+        if ((args.clear and args.merge) or (((args.url or args.rutube) and (not args.download or (args.download and not args.continue_interrupted_download and not args.download_missing_only))) and rawDirPathExists)) :
             print('')
             if not yes_or_no(f'{_WA} all existing chunks (\'{__raw_ext}\') files in \'{RAW_DATA_DIR}\' (if any) will be deleted. Continue?'):
                 print('Abort..')
 
-                return False#True
+                return False
 
         elif ((args.clear and args.concat) or (args.clear and args.tracks_overlay) or (args.clear and args.convert)) :
             print('')
             if not yes_or_no(f'{_WA} Source files will be deleted after successful end of operation. Continue?'):
                 print('Abort..')
 
-                return False#True
+                return False
 
 
-
+    # for more than 2 args to '--url' (recursion)..
     if args.url :
         url_amount = len(args.url)
        
-        # for more than 2 url args..
         if url_amount > 2 :
             print("'--url' flag expects no more than two arguments. Abort..")
 
@@ -1240,24 +1187,13 @@ def main_logic (args: argparse.Namespace) -> int :
 
                 if not args.download :
                     args.tracks_overlay = output_names
-                    args.url = False
-                    ##args.clear = True
-                    #args.yes_please = True
+                    args.url = False 
+                    
                     ret = main_logic(args)
-                    
-                    #if ret:
-                    #    for temp_file in output_names:
-                    #        print("name to delete:", temp_file)
-                    #        remove_file(temp_file)
-                    
+                     
                     return ret
 
                 return True
-
-
-
-    if not os.path.exists(DATA_DIR) :
-        os.makedirs(DATA_DIR)
 
 
 
@@ -1275,19 +1211,6 @@ def main_logic (args: argparse.Namespace) -> int :
     else:
         OUTPUT_NAME=f"{' '.join(args.output)}" # output file name
 
-    if args.outputDir:
-        newPath=f"{' '.join(args.outputDir)}" 
-        pathlib.Path(newPath).mkdir(parents=True, exist_ok=True) 
-        DATA_DIR = newPath
-
-
-
-    if args.tempDir:
-        newPath=f"{' '.join(args.tempDir)}"
-        print("newTEMP==", newPath)
-        pathlib.Path(newPath).mkdir(parents=True, exist_ok=True) 
-        TEMP_DIR=newPath
-        DOWNLOAD_ERRORS_LOG_F = f'{TEMP_DIR}/last_download_errors.log'
 
     #concat several videofiles to 1 
     if args.concat:
@@ -1394,10 +1317,8 @@ def main_logic (args: argparse.Namespace) -> int :
         return merge2output_format(f'{OUTPUT_NAME}',  __ext, RAW_DATA_DIR, args.clear, args.yes_please)
 
 
-
     return True
 #defend
-
 
 
 if __name__ == "__main__":
@@ -1419,5 +1340,6 @@ if __name__ == "__main__":
         print(_FA + " Something goes wrong..")
 
     print('Done.')
+
 
 
