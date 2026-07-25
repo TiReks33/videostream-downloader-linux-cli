@@ -1,8 +1,8 @@
 # ::[videostream-downloader-linux-cli[v0.89a]]::
 ## Description
-Downloads input chunklist(.m3u8) of media transport stream by its URL and converts raw fragments to .mp4/.mp3 or other container format of video/audio files (by ffmpeg). Testing on Linux Debian OS 11.6 && FreeBSD 13.2.
+Downloads input chunklist(.m3u8) of media transport stream by its URL and converts raw fragments to .mp4/.mp3 or other container format of video/audio files (by ffmpeg). Testing on Linux Debian 11.6 (Python 3.9.2), Debian 13 (Python 3.13.5) && FreeBSD 13.2.
 ## Depends
-wget, ffmpeg, Python interpreter (testing on Python 3.9.2)
+wget, ffmpeg, Python interpreter (testing on Python 3.9.2 && 3.13.5). External python libs to install via 'pip' you may find in 'requirements.txt' file.
   
 ## Usage
 ---
