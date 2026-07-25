@@ -1,5 +1,3 @@
-
-
 from enum import unique, Enum, EnumMeta
 
 class EnumDirectValueMeta(EnumMeta):
@@ -18,18 +16,10 @@ class videoMarks():
         for mark__, quality__ in self._markQualEnum.__members__.items():
             self._markQualityMap[mark__[1:]] = quality__
 
-        #for key_ in self.markQualityMap :
-            #print(f"mark=={key_}::quality=={self.markQualityMap[key_]}")
-
 
         self._qualityResMap = dict()
         for quality__, resolution__ in self._qualResEnum.__members__.items():
             self._qualityResMap[quality__[1:]] = resolution__
-
-        #for key_ in self._qualityResMap :
-            #print(f"quality=={key_}::resolution=={self._qualityResMap[key_]}")
-
-
 
 
     def getQuality4romMark(self, mark__: str) -> str :
@@ -103,7 +93,6 @@ class videoMarks():
         if qual in qualityList :
             print(qual, " in enum!!")
             return qual
-        #return ""
 
 
         split = qual.split('x')[-1]
@@ -115,9 +104,7 @@ class videoMarks():
         qual_heights = [int(el.split('x')[-1]) for el in qualityList]
 
         ind, val = min(enumerate(qual_heights), key=lambda x:abs(x[1] - qual_height))
-        #print("ind==", ind, "val==", val)
-
-        #return list(qualityList)[ind].value
+        
         return qualityList[ind]
 
 
@@ -144,7 +131,6 @@ if __name__ == "__main__":
 
     res = marks.get_closest_qual(marks.getRes4romQuality(marks.getQuality4romMark("HD")), lis)
     print("fin==", res)
-    #print("fin2==", marks.getQuality4romRes(res))
 
 
 

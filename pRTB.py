@@ -16,16 +16,12 @@ except ImportError:
     print("pRTB::'video_marks' module is missing.:(")
     print(f"{'*'*os.get_terminal_size().columns}")
 
-http_headers = Headers(os="win", headers=True).generate() #{'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5756.197 Safari/537.36'}) #'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0'})
+http_headers = Headers(os="win", headers=True).generate()
 
-#http_headers['Accept-Encoding'] = '*' # OR
-#http_headers['Accept-Encoding'] = 'identity' # OR
 if http_headers.get('Accept-Encoding') != None :
     del http_headers['Accept-Encoding'] # 'fix' for random headers to not use special compressions for delivery content (default utf-8) 
 
 
-
-#def get_rtb_link(url__: str, pref_qual__: str = None) -> str: 
 def get_rtb_src(url__: str, pref_qual__: str = None): 
 
     marks = videoMarks()
@@ -87,18 +83,6 @@ def get_rtb_src(url__: str, pref_qual__: str = None):
 
     print("stream file data==", stream_file_data)
 
-
-    #def find_all_occurrences(string, substring):
-    #    start = 0
-    #    indices = []
-    #    while True:
-    #        start = string.find(substring, start)
-    #        if start == -1:
-    #            break
-    #        indices.append(start)
-    #        start += len(substring)
-    #    return indices
-
     def find_all_res(string):
         start = 0
         end = 0
@@ -118,12 +102,10 @@ def get_rtb_src(url__: str, pref_qual__: str = None):
             value = string[end:start]
             print("value==", value)
             res_map[key] = value
-            #indices.append(start)
-            #start += len(substring)
         
-        return res_map#indices
+        return res_map
 
-    res_map = find_all_res(stream_file_data)  # Output: [0, 5, 10, 15]
+    res_map = find_all_res(stream_file_data)
 
     print("res_map==",res_map)
 
@@ -138,7 +120,6 @@ def get_rtb_src(url__: str, pref_qual__: str = None):
 
     print("res_map[closest]==", res_map[closest])
 
-    #sys.exit(0)
     return res_map[closest], vid_title_string
     
 
@@ -157,7 +138,6 @@ if __name__ == "__main__":
     except IndexError: 
         pass
 
-    #get_rtb_link(url, qual)
     link, name = get_rtb_src(url, qual)
 
     print("link==", link, "name==", name)

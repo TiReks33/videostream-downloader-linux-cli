@@ -1,4 +1,4 @@
-# ::[videostream-downloader-linux-cli[v0.89a]]::
+# ::[videostream-downloader-linux-cli[v0.89b]]::
 ## Description
 Downloads input chunklist(.m3u8) of media transport stream by its URL and converts raw fragments to .mp4/.mp3 or other container format of video/audio files (by ffmpeg). Testing on Linux Debian 11.6 (Python 3.9.2), Debian 13 (Python 3.13.5) && FreeBSD 13.2.
 ## Depends
@@ -7,7 +7,7 @@ wget, ffmpeg, Python interpreter (testing on Python 3.9.2 && 3.13.5). External p
 ## Usage
 ---
 **Please note before use this software**:
-> ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this programm from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
+> ***[This software is for testing purposes only; if you are not developer of corresponding platform (from which the multimedia source file is supposed to be downloaded), and/or you doesn't have legal permissions to direct access/download multimedia sources files from platform servers, you should remove all file/s that have been previously downloaded via this program from your device, if any (unless otherwise permitted by your country local laws and platform rules). Be carefull and law abiding citizen!]***
 ---
 Copy-paste your transport media's chunklist URL adress and put it as '--url'('-u') argument. This can be done by next method:  
   
