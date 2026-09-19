@@ -135,7 +135,7 @@ def yes_no_abort(question) -> Answer :
 
 
 def prompt(question):
-    return str(input(question + ' ')).lower().strip()
+    return str(input(question + ' ')).strip()
 
 def getFilesInDir(path:str) ->list:
     for file in os.listdir(f'{path}'):
