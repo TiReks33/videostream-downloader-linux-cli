@@ -1,5 +1,6 @@
 from enum import unique, Enum, EnumMeta
 
+
 class EnumDirectValueMeta(EnumMeta):
     def __getattribute__(cls, name):
         value = super().__getattribute__(name)
@@ -85,13 +86,10 @@ class videoMarks():
     def get_closest_qual(self, qual: str, qualityList = None) -> str:
         if qualityList is None:
             qualityList = [x.value for x in self._qualityResMap.values()]#list(map(lambda x: x.value, self._qualityResMap.values()))
-
-        print("map type==", type(qualityList))
-        print("map==", qualityList)
         
 
         if qual in qualityList :
-            print(qual, " in enum!!")
+            print(qual, "presented in enum!!")
             return qual
 
 
@@ -107,30 +105,6 @@ class videoMarks():
         
         return qualityList[ind]
 
-
-if __name__ == "__main__":
-    marks = videoMarks()
-    print("getQual4Mark==", marks.getQuality4romMark("FullHD"))
-    print("getQual4Mark==", marks.getQuality4romMark("HDgsdfgg"))
-    print("getQual4Mark==", marks.getQuality4romMark(""))
-    print("getQual4Mark==", marks.getQuality4romMark("-1"))
-
-    print("qual4res==", marks.getQuality4romRes("1280x720"))
-    print("qual4res==", marks.getQuality4romRes("1280x72"))
-    print("qual4res==", marks.getQuality4romRes(""))
-    print("qual4res==", marks.getQuality4romRes("-1"))
-    print("qual4res==", marks.getQuality4romRes("abc"))
-
-    print("res4qual(enum)==", marks.getRes4romQuality("144p"))
-    print("res4qual(enum)==", marks.getRes4romQuality("720"))
-    print("res4qual(enum)==", marks.getRes4romQuality(""))
-    print("res4qual(enum)==", marks.getRes4romQuality("-1"))
-    print("res4qual(enum)==", marks.getRes4romQuality("abc"))
-
-    lis = ["256x144", "424x240", "492x360", "856x480"]
-
-    res = marks.get_closest_qual(marks.getRes4romQuality(marks.getQuality4romMark("HD")), lis)
-    print("fin==", res)
 
 
 

@@ -1,0 +1,44 @@
+[v0.9]
+
+[fixes]:
+0) fixed error with redirecting stdout output to file;
+1) fixed space esccaping with '--rawDir' option on chunks download stage;
+2) fixed incorrect behaviour in case when '.m3u8' playlist presented as 1 file, but with various timestamps;
+3) fixed bug with converting media streams to '.flac'/'.mp3' audio formats, because of missing explicit audio-codec argument in ffmpeg's call;
+4) fixed scenario on '--merge' stage, when only 1 file in 'raw' dir presented, and raw format is same as output format;
+5) fixed bug on '--merge' stage when '--rawDir' is not empty but not include files with given 'raw' extensions;
+6) functions for '--concat' (concat demuxer), --'tracks-overlay' (concat filter) and '--convert' now accepting paths in 2nd parameter, not just filenames (w/o using global variable);
+7) fixed bug in calculation of required space before merging chunks.
+
+[changes]:
+0) added group of flags for setting custom and random HTTP headers for GET requests ('--download' stage): '--header', '--headers', '--headers-string', '--headers-file', '--random-headers';
+1) rewritten and optimized download parsing logic; now HLS init files correctly processed in case when parameters changes in same playlist "on the fly" via #EXT-X-DISCONTINUITY + #EXT-X-MAP:URI tags (HLS init files in '--rawDir' now have special mark with '#' before extension after download, i.e.: 'segment1#.m4s', 'segment1.m4s', 'segment2.m4s');
+2) 'merge' main function changed to comply with new chunks downloading logic;
+3) '--output'('-o') argument now became '--outputName'('-o') to prevent mashings with '--outputDir' arg. 
+
+
+###
+
+[v0.89b] -- fixed bug when custom directory flags ('--outputDir', '--rawDir', '--tempDir') not work with 2 arguments '--url' command ('.m4s' streams audio/video parts); some minor fixes in logic; code clear.
+
+###
+
+[v0.89a] -- fixed some functions
+
+###
+
+[v0.89] -- Big update; added support for audio streams, '--url' now supports 2 arguments for '.m4s' format streams (for audio/video parts parallel downloads of fragmented MP4 HLS), added options for overlaying video-audio file parts of video (helpful with '.m4s' format), converting media files to different formats with and without reencoding (see '--convert' and '--reencode' flags in '--help'), more output formats for video and audio streams ops, and new bugs;).
+
+### Pre-versioning commits
+
+[Oct. 17, 2025] -- fixed incorrect work of '--merge' in case of non-standard input filepaths (--rawDir, --tempDir, --outputDir) included backslashes, spaces etc.; fixed some typos in code
+
+[Oct. 16, 2025] -- minor update: a) fixed list of FAT/NTFS fs's illegal symbols in filenames; 2) fixed some logic in '--download' stage with '--rawDir' flag
+
+[Aug. 1, 2025] -- added additional flags for audio formats (such as .aac, .flac, .wav), support for custom raw chunks formats (for ex., .aac)
+
+[May 2, 2025] -- bug fix with chunklist file download to NTFS partition when URL path contains special characters (like '?','&' etc.) that not permitted for file names in such filesystems.
+
+[Apr. 20, 2025] -- Big update -- fixed troubles with 'concat-demuxer' when too many .ts chunks gets merged (shell concat, or 'concat protocol' used instead), new flags for continue interrupted download of chunks (and selectively download only new ones that not presented in 'raw' dir), added flags for additional formats for output video(.mkv,.mov, or simply 'raw' .ts without converting), some optimization for '--merge' stage, options for overriding default dirs ('raw','output','temp'), also script now checks approximate required disk space and available on chosen partitions (for 'raw','output' and 'temp' paths separately).
+
+
